@@ -1,16 +1,24 @@
 const express = require('express');
 const mongoose = require('mongoose');
-// Слушаем 3000 порт
+const userRoutes = require('./routes/users');
+const cardRoutes = require('./routes/cards');
 const { PORT = 3000 } = process.env;
 
 const app = express();
 
-app.listen(PORT, () => {
-    // Если всё работает, консоль покажет, какой порт приложение слушает
-    console.log(`App listening on port ${PORT}`)
-})
+app.use(userRoutes);
+app.use(cardRoutes);
 
-mongoose.connect('mongodb://localhost:27017/mestodb', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+async function main() {
+  await mongoose.connect('mongodb://localhost:27017/mestodb', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  console.log(`Connected to Database`)
+
+  app.listen(PORT, () => {
+  console.log(`App listening on port ${PORT}`)
+  })
+}
+
+main();
