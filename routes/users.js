@@ -8,4 +8,4 @@ userRoutes.post('/users', express.json(), createUser);
 userRoutes.patch('/users/me', express.json(), updateUser);
 userRoutes.patch('/users/me/avatar', express.json(), updateAvatar);
 
-exports.userRoutes = userRoutes;
+module.exports = userRoutes;

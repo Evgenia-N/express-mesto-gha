@@ -8,4 +8,4 @@ cardRoutes.delete('/cards/:cardId', express.json(), deleteCard);
 cardRoutes.put('/cards/:cardId/likes', express.json(), likeCard);
 cardRoutes.delete('/cards/:cardId/likes', express.json(), dislikeCard);
 
-exports.cardRoutes = cardRoutes;
+module.exports = cardRoutes;
