@@ -7,16 +7,13 @@ exports.getUsers = async (req, res) => {
   }
   catch(err){
     console.log(err)
-    if (err.errors.name.name = 'ValidatorError') {
-      return res.status(400).send(err.message)
-    }
     res.status(500).send({message: "Произошла ошибка", ...err})
   }
 }
 
 exports.getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id)
+    const user = await User.findById(req.user._id)
     if (user) {
       res.status(200).send(user);
     } else {
@@ -25,7 +22,7 @@ exports.getUser = async (req, res) => {
   }
   catch(err){
     console.log(err)
-    if (err.errors.name.name = 'ValidatorError') {
+    if (err.name = 'ValidatorError') {
       return res.status(400).send(err.message)
     }
     res.status(500).send({message: "Произошла ошибка", ...err})
@@ -34,14 +31,13 @@ exports.getUser = async (req, res) => {
 
 exports.createUser = async (req, res) => {
   try {
-    const user = new User(req.body)
-    res.status(201).send(await user.save());
-    // const { name, about, avatar } = req.body; // получим из объекта запроса имя и описание пользователя
-    //  User.create({ name, about, avatar });
+    console.log(req.body)
+    const newUser = new User(req.body);
+    res.status(201).send(await newUser.save());
   }
   catch(err){
     console.log(err)
-    if (err.errors.name.name = 'ValidatorError') {
+    if (err.name = 'ValidatorError') {
       return res.status(400).send(err.message)
     }
     res.status(500).send({message: "Произошла ошибка", ...err})
@@ -49,9 +45,10 @@ exports.createUser = async (req, res) => {
 }
 
 exports.updateUser  = async (req, res) => {
+  console.log(req.body);
   try {
-    const user = await User.findByIdAndUpdate(req.params.id,
-      { name: '', about: '' },
+    const user = await User.findByIdAndUpdate(req.user._id,
+      { name: req.body.name, about: req.body.about},
       {
         new: true,
         runValidators: true
@@ -65,7 +62,7 @@ exports.updateUser  = async (req, res) => {
   }
   catch(err){
     console.log(err)
-    if (err.errors.name.name = 'ValidatorError') {
+    if (err.name = 'ValidatorError') {
       return res.status(400).send(err.message)
     }
     res.status(500).send({message: "Произошла ошибка", ...err})
@@ -74,8 +71,8 @@ exports.updateUser  = async (req, res) => {
 
 exports.updateAvatar  = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id,
-      { avatar: '' },
+    const user = await User.findByIdAndUpdate(req.user._id,
+      { avatar: req.body.avatar },
       {
         new: true,
         runValidators: true
@@ -89,7 +86,7 @@ exports.updateAvatar  = async (req, res) => {
   }
   catch(err){
     console.log(err)
-    if (err.errors.name.name = 'ValidatorError') {
+    if (err.name = 'ValidatorError') {
       return res.status(400).send(err.message)
     }
     res.status(500).send({message: "Произошла ошибка", ...err})
