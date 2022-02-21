@@ -13,7 +13,7 @@ exports.getUsers = async (req, res) => {
 
 exports.getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id)
+    const user = await User.findById(req.params.id)
     if (user) {
       res.status(200).send(user);
     } else {
@@ -23,7 +23,7 @@ exports.getUser = async (req, res) => {
   catch(err){
     console.log(err)
     if (err.name = 'ValidatorError') {
-      return res.status(400).send({message: err.message})
+      return res.status(400).send({message: "Произошла ошибка"})
     }
     res.status(500).send({message: "Произошла ошибка", ...err})
   }
@@ -38,7 +38,7 @@ exports.createUser = async (req, res) => {
   catch(err){
     console.log(err)
     if (err.name = 'ValidatorError') {
-      return res.status(400).send(err.message)
+      return res.status(400).send({message: "Произошла ошибка"})
     }
     res.status(500).send({message: "Произошла ошибка", ...err})
   }
@@ -63,7 +63,7 @@ exports.updateUser  = async (req, res) => {
   catch(err){
     console.log(err)
     if (err.name = 'ValidatorError') {
-      return res.status(400).send(err.message)
+      return res.status(400).send({message: "Произошла ошибка"})
     }
     res.status(500).send({message: "Произошла ошибка", ...err})
   }
