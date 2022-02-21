@@ -13,17 +13,20 @@ exports.getUsers = async (req, res) => {
 
 exports.getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id)
+    //console.log(req.params);
+    //const { userId } = req.params;
+    //const user = await User.find((item) => item._id === userId);
+    const user = await User.findById(req.params.userId)
     if (user) {
       res.status(200).send(user);
     } else {
-      res.status(404).send({message: "Пользователь не найден"});
+      res.status(404).send({message: "Пользователя с таким id не существует"});
     }
   }
   catch(err){
     console.log(err)
     if (err.name = 'ValidatorError') {
-      return res.status(400).send({message: "Произошла ошибка"})
+      return res.status(400).send({message: "Переданы некорректные данные"})
     }
     res.status(500).send({message: "Произошла ошибка", ...err})
   }
@@ -45,19 +48,24 @@ exports.createUser = async (req, res) => {
 }
 
 exports.updateUser  = async (req, res) => {
-  console.log(req.body);
+  //console.log(req.body);
   try {
-    const user = await User.findByIdAndUpdate(req.user._id,
-      { name: req.body.name, about: req.body.about},
-      {
-        new: true,
-        runValidators: true
+    if (req.body.name && req.body.about) {
+      const user = await User.findByIdAndUpdate(req.user._id,
+        { name: req.body.name, about: req.body.about},
+        {
+          new: true,
+          runValidators: true
+        }
+      );
+      if (user) {
+        res.status(200).send(user);
+      } else {
+        res.status(404).send({message: "Пользователь не найден"});
       }
-    );
-    if (user) {
-      res.status(200).send(user);
-    } else {
-      res.status(404).send({message: "Пользователь не найден"});
+    }
+    else {
+      res.status(400).send({message: "Не заполнены обязательные поля"})
     }
   }
   catch(err){
