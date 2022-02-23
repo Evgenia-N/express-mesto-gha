@@ -35,7 +35,7 @@ exports.deleteCard = async (req, res) => {
   try {
     const deletedCard = await Card.findById(req.params.cardId);
     if (deletedCard) {
-      await Card.findOneAndRemove({_id: req.params.cardId});
+      await Card.findByIdAndRemove(req.params.cardId);
       res.status(200).send({message:"Следующие данные были удалены", deletedCard});
     }
     else {
