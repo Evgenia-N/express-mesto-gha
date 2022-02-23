@@ -3,12 +3,7 @@ const Card = require('../models/card')
 exports.getCards = async (req, res) => {
   try {
     const cards = await Card.find({});
-    if (cards.length > 0) {
-      res.status(200).send(cards);
-    }
-    else {
-      res.status(200).send({message: "Отсутствуют данные для отображения"});
-    }
+    res.status(200).send(cards);
   }
   catch(err){
     console.log(err)
