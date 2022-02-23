@@ -18,8 +18,6 @@ exports.getCards = async (req, res) => {
 
 exports.createCard = async (req, res) => {
   try {
-    console.log(req.body);
-    console.log(req.user._id);
     const { name, link } = req.body;
     const newCard = new Card({name, link, owner: req.user._id});
     res.status(201).send(await newCard.save());
@@ -35,9 +33,14 @@ exports.createCard = async (req, res) => {
 
 exports.deleteCard = async (req, res) => {
   try {
-    const deletedCard = ({_id: req.params.cardId});
-    await Card.findOneAndRemove({_id: req.params.cardId});
-    res.status(200).send({message:"Следующие данные были удалены", deletedCard});
+    const deletedCard = await Card.findById(req.params.cardId);
+    if (deletedCard) {
+      await Card.findOneAndRemove({_id: req.params.cardId});
+      res.status(200).send({message:"Следующие данные были удалены", deletedCard});
+    }
+    else {
+      res.status(404).send({message:"Фото не найдено"});
+    }
   }
   catch(err){
     console.log(err)
@@ -50,9 +53,9 @@ exports.deleteCard = async (req, res) => {
 
 exports.likeCard = async (req, res) => {
   try {
-    const likedCard = ({_id: req.params.cardId});
+    const likedCard = await Card.findById(req.params.cardId);
     if (likedCard) {
-      await Card.findOneAndUpdate({_id: req.params.cardId},
+      await Card.findByIdAndUpdate(req.params.cardId,
         { $addToSet: { likes: req.user._id } },
         { new: true },
         );
@@ -73,9 +76,9 @@ exports.likeCard = async (req, res) => {
 
 exports.dislikeCard = async (req, res) => {
   try {
-    const dislikedCard = ({_id: req.params.cardId});
+    const dislikedCard = await Card.findById(req.params.cardId);
     if (dislikedCard) {
-      await Card.findOneAndUpdate({_id: req.params.cardId},
+      await Card.findByIdAndUpdate(req.params.cardId,
         { $pull: { likes: req.user._id } },
         { new: true },
       ) ;
