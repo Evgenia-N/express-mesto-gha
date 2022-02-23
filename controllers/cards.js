@@ -51,16 +51,21 @@ exports.deleteCard = async (req, res) => {
 exports.likeCard = async (req, res) => {
   try {
     const likedCard = ({_id: req.params.cardId});
-    await Card.findOneAndUpdate({_id: req.params.cardId},
-    { $addToSet: { likes: req.user._id } },
-    { new: true },
-    );
-    res.status(200).send(likedCard);
+    if (likedCard) {
+      await Card.findOneAndUpdate({_id: req.params.cardId},
+        { $addToSet: { likes: req.user._id } },
+        { new: true },
+        );
+        res.status(200).send(likedCard);
+    }
+    else {
+      return res.status(404).send({message: "Фото с таким id не существует"})
+    }
   }
   catch(err){
     console.log(err)
     if (err.name = 'ValidatorError') {
-      return res.status(400).send({message: "Ошибка проставления отметки"})
+      return res.status(400).send({message: "Ошибка проставления отметки"});
     }
     res.status(500).send({message: "Произошла внутренняя ошибка сервера", ...err})
   }
@@ -69,11 +74,16 @@ exports.likeCard = async (req, res) => {
 exports.dislikeCard = async (req, res) => {
   try {
     const dislikedCard = ({_id: req.params.cardId});
-    await Card.findOneAndUpdate({_id: req.params.cardId},
-    { $pull: { likes: req.user._id } },
-    { new: true },
-  ) ;
-    res.status(200).send(dislikedCard);
+    if (dislikedCard) {
+      await Card.findOneAndUpdate({_id: req.params.cardId},
+        { $pull: { likes: req.user._id } },
+        { new: true },
+      ) ;
+        res.status(200).send(dislikedCard);
+    }
+    else {
+      return res.status(404).send({message: "Фото с таким id не существует"})
+    }
   }
   catch(err){
     console.log(err)
