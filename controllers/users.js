@@ -1,103 +1,81 @@
-const User = require('../models/user')
+const User = require('../models/user');
 
 exports.getUsers = async (req, res) => {
   try {
     const users = await User.find({});
-    if (users.length > 0) {
-      res.status(200).send(users);
-    }
-    else {
-      res.status(200).send({message: "Отсутствуют данные для отображения"});
-    }
+    res.status(200).send(users);
+  } catch (err) {
+    res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
   }
-  catch(err){
-    console.log(err)
-    res.status(500).send({message: "Произошла внутренняя ошибка сервера", ...err})
-  }
-}
+};
 
 exports.getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId)
+    const user = await User.findById(req.params.userId);
     if (user) {
-      res.status(200).send(user);
-    } else {
-      res.status(404).send({message: "Пользователя с таким id не существует"});
+      return res.status(200).send(user);
     }
-  }
-  catch(err){
-    console.log(err)
-    if (err.name = 'ValidatorError') {
-      return res.status(400).send({message: "Переданы некорректные данные"})
+    return res.status(404).send({ message: 'Пользователя с таким id не существует' });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).send({ message: 'Переданы некорректные данные' });
     }
-    res.status(500).send({message: "Произошла внутренняя ошибка сервера", ...err})
+    return res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
   }
-}
+};
 
 exports.createUser = async (req, res) => {
   try {
-    console.log(req.body)
     const newUser = new User(req.body);
-    res.status(201).send(await newUser.save());
-  }
-  catch(err){
-    console.log(err)
-    if (err.name = 'ValidatorError') {
-      return res.status(400).send({message: "Произошла ошибка при заполнении обязательных полей"})
+    return res.status(201).send(await newUser.save());
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(400).send({ message: 'Произошла ошибка при заполнении обязательных полей' });
     }
-    res.status(500).send({message: "Произошла внутренняя ошибка сервера", ...err})
+    return res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
   }
-}
+};
 
-exports.updateUser  = async (req, res) => {
+exports.updateUser = async (req, res) => {
   try {
-    if (req.body.name && req.body.about) {
-      const user = await User.findByIdAndUpdate(req.user._id,
-        { name: req.body.name, about: req.body.about},
-        {
-          new: true,
-          runValidators: true
-        }
-      );
-      if (user) {
-        res.status(200).send(user);
-      } else {
-        res.status(404).send({message: "Пользователь не найден"});
-      }
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { name: req.body.name, about: req.body.about },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+    if (user) {
+      return res.status(200).send(user);
     }
-    else {
-      res.status(400).send({message: "Не заполнены обязательные поля"})
+    return res.status(404).send({ message: 'Пользователь не найден' });
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(400).send({ message: 'Произошла ошибка при заполнении обязательных полей' });
     }
+    return res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
   }
-  catch(err){
-    console.log(err)
-    if (err.name = 'ValidatorError') {
-      return res.status(400).send({message: "Произошла ошибка"})
-    }
-    res.status(500).send({message: "Произошла внутренняя ошибка сервера", ...err})
-  }
-}
+};
 
-exports.updateAvatar  = async (req, res) => {
+exports.updateAvatar = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.user._id,
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
       { avatar: req.body.avatar },
       {
         new: true,
-        runValidators: true
-      }
+        runValidators: true,
+      },
     );
     if (user) {
-      res.status(200).send(user);
-    } else {
-      res.status(404).send({message: "Пользователь не найден"});
+      return res.status(200).send(user);
     }
-  }
-  catch(err){
-    console.log(err)
-    if (err.name = 'ValidatorError') {
-      return res.status(400).send(err.message)
+    return res.status(404).send({ message: 'Пользователь не найден' });
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(400).send({ message: 'Произошла ошибка при заполнении обязательных полей' });
     }
-    res.status(500).send({message: "Произошла внутренняя ошибка сервера", ...err})
+    return res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
   }
-}
+};
