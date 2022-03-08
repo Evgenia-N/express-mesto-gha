@@ -1,4 +1,5 @@
 const Card = require('../models/card');
+const user = require('../models/user');
 
 exports.getCards = async (req, res) => {
   try {
@@ -26,8 +27,11 @@ exports.deleteCard = async (req, res) => {
   try {
     const deletedCard = await Card.findById(req.params.cardId);
     if (deletedCard) {
-      await Card.findByIdAndRemove(req.params.cardId);
-      return res.status(200).send({ message: 'Следующие данные были удалены', deletedCard });
+      if (user.id === deletedCard.owner) {
+        await Card.findByIdAndRemove(req.params.cardId);
+        return res.status(200).send({ message: 'Следующие данные были удалены', deletedCard });
+      }
+      return res.status(403).send({ message: 'Нет прав для удаления данного фото' });
     }
     return res.status(404).send({ message: 'Фото не найдено' });
   } catch (err) {

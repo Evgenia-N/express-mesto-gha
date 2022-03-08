@@ -1,19 +1,21 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+
 const userRoutes = require('./routes/users');
 
 const cardRoutes = require('./routes/cards');
 
 const { PORT = 3000 } = process.env;
 const app = express();
-
-app.use((req, res, next) => {
-  req.user = {
-    _id: '6213e0c8d1032872193286b4',
-  };
-
-  next();
-});
+app.use(cookieParser());
+// app.use((req, res, next) => {
+//   req.user = {
+//     _id: '6213e0c8d1032872193286b4',
+//   };
+//
+//   next();
+// });
 
 app.use(userRoutes);
 app.use(cardRoutes);
