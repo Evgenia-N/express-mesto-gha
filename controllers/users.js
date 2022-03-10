@@ -1,47 +1,52 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const { generateToken } = require('../middlewares/jwt');
+const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
+const DuplicateError = require('../errors/DuplicateError');
+const UnAuthorisedError = require('../errors/UnAuthorisedError');
 
 const DUPLICATE_ERROR_CODE = 11000;
 const SALT_ROUNDS = 10;
 
-exports.getUsers = async (req, res) => {
+exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
     res.status(200).send(users);
   } catch (err) {
-    res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
+    next(err);
   }
 };
 
-exports.getUser = async (req, res) => {
+exports.getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.userId);
     if (user) {
       return res.status(200).send(user);
     }
-    return res.status(404).send({ message: 'Пользователя с таким id не существует' });
+    throw new NotFoundError('Пользователя с таким id не существует');
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(400).send({ message: 'Переданы некорректные данные' });
+      next(new BadRequestError('Переданы некорректные данные'));
     }
-    return res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
+    next(err);
+    return null;
   }
 };
 
-exports.getThisUser = async (req, res) => {
+exports.getThisUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
     res.status(200).send(user);
   } catch (err) {
-    res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
+    next(err);
   }
 };
 
-exports.createUser = (req, res) => {
+exports.createUser = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(400).send({ message: 'Произошла ошибка при заполнении обязательных полей' });
+    throw new BadRequestError('Произошла ошибка при заполнении обязательных полей');
   }
   return bcrypt.hash(password, SALT_ROUNDS)
     .then((hash) => User.create({
@@ -53,19 +58,20 @@ exports.createUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Произошла ошибка при заполнении обязательных полей' });
+        next(new BadRequestError('Произошла ошибка при заполнении обязательных полей'));
       }
       if (err.code === DUPLICATE_ERROR_CODE) {
-        return res.status(409).send({ message: 'Пользователь с таким email уже зарегистрирован' });
+        next(new DuplicateError('Пользователь с таким email уже зарегистрирован'));
       }
-      return res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
+      next(err);
+      return null;
     });
 };
 
-exports.login = (req, res) => {
+exports.login = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(400).send({ message: 'Произошла ошибка при заполнении обязательных полей' });
+    throw new BadRequestError('Произошла ошибка при заполнении обязательных полей');
   }
   return User.findOne({ email }).select('+password')
     // .orFail(new Error('Переданы некорректные данные'))
@@ -87,15 +93,15 @@ exports.login = (req, res) => {
           return res.status(200).send({ message: `С возвращением, ${user.name}!`, jwt: token });
         })
         .catch((err) => {
-          res.status(401).send({ message: err.message });
+          next(new UnAuthorisedError(err.message));
         });
     })
     .catch((err) => {
-      res.status(404).send({ message: err.message, ...err });
+      next(err);
     });
 };
 
-exports.updateUser = async (req, res) => {
+exports.updateUser = async (req, res, next) => {
   try {
     const user = await User.findByIdAndUpdate(
       req.user._id,
@@ -108,16 +114,17 @@ exports.updateUser = async (req, res) => {
     if (user) {
       return res.status(200).send(user);
     }
-    return res.status(404).send({ message: 'Пользователь не найден' });
+    throw new NotFoundError('Пользователь не найден');
   } catch (err) {
     if (err.name === 'ValidationError') {
-      return res.status(400).send({ message: 'Произошла ошибка при заполнении обязательных полей' });
+      next(new BadRequestError('Произошла ошибка при заполнении обязательных полей'));
     }
-    return res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
+    next(err);
+    return null;
   }
 };
 
-exports.updateAvatar = async (req, res) => {
+exports.updateAvatar = async (req, res, next) => {
   try {
     const user = await User.findByIdAndUpdate(
       req.user._id,
@@ -130,11 +137,12 @@ exports.updateAvatar = async (req, res) => {
     if (user) {
       return res.status(200).send(user);
     }
-    return res.status(404).send({ message: 'Пользователь не найден' });
+    throw new NotFoundError('Пользователь не найден');
   } catch (err) {
     if (err.name === 'ValidationError') {
-      return res.status(400).send({ message: 'Произошла ошибка при заполнении обязательных полей' });
+      next(new BadRequestError('Произошла ошибка при заполнении обязательных полей'));
     }
-    return res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
+    next(err);
+    return null;
   }
 };
