@@ -1,48 +1,52 @@
+const BadRequestError = require('../errors/BadRequestError');
+const ForbiddenError = require('../errors/ForbiddenError');
+const NotFoundError = require('../errors/NotFoundError');
 const Card = require('../models/card');
-const user = require('../models/user');
 
-exports.getCards = async (req, res) => {
+exports.getCards = async (req, res, next) => {
   try {
     const cards = await Card.find({});
     res.status(200).send(cards);
   } catch (err) {
-    res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
+    next(err);
   }
 };
 
-exports.createCard = async (req, res) => {
+exports.createCard = async (req, res, next) => {
   try {
     const { name, link } = req.body;
     const newCard = new Card({ name, link, owner: req.user._id });
     return res.status(201).send(await newCard.save());
   } catch (err) {
     if (err.name === 'ValidationError') {
-      return res.status(400).send({ message: 'Произошла ошибка при заполнении обязательных полей' });
+      next(new BadRequestError('Произошла ошибка при заполнении обязательных полей'));
     }
-    return res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
+    next(err);
+    return null;
   }
 };
 
-exports.deleteCard = async (req, res) => {
+exports.deleteCard = async (req, res, next) => {
   try {
     const deletedCard = await Card.findById(req.params.cardId);
     if (deletedCard) {
-      if (user.id === deletedCard.owner) {
+      if (req.user._id === deletedCard.owner._id.toString()) {
         await Card.findByIdAndRemove(req.params.cardId);
         return res.status(200).send({ message: 'Следующие данные были удалены', deletedCard });
       }
-      return res.status(403).send({ message: 'Нет прав для удаления данного фото' });
+      throw new ForbiddenError('Нет прав для удаления данного фото');
     }
-    return res.status(404).send({ message: 'Фото не найдено' });
+    throw new NotFoundError('Фото не найдено');
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(400).send({ message: 'Ошибка удаления фото' });
+      next(new BadRequestError('Ошибка удаления фото'));
     }
-    return res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
+    next(err);
+    return null;
   }
 };
 
-exports.likeCard = async (req, res) => {
+exports.likeCard = async (req, res, next) => {
   try {
     const likedCard = await Card.findById(req.params.cardId);
     if (likedCard) {
@@ -53,16 +57,17 @@ exports.likeCard = async (req, res) => {
       );
       return res.status(200).send(likedCard);
     }
-    return res.status(404).send({ message: 'Фото с таким id не существует' });
+    throw new NotFoundError('Фото с таким id не существует');
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(400).send({ message: 'Ошибка проставления отметки' });
+      next(new BadRequestError('Ошибка проставления отметки'));
     }
-    return res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
+    next(err);
+    return null;
   }
 };
 
-exports.dislikeCard = async (req, res) => {
+exports.dislikeCard = async (req, res, next) => {
   try {
     const dislikedCard = await Card.findById(req.params.cardId);
     if (dislikedCard) {
@@ -73,11 +78,12 @@ exports.dislikeCard = async (req, res) => {
       );
       return res.status(200).send(dislikedCard);
     }
-    return res.status(404).send({ message: 'Фото с таким id не существует' });
+    throw new NotFoundError('Фото с таким id не существует');
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(400).send({ message: 'Ошибка проставления отметки' });
+      next(new BadRequestError('Ошибка проставления отметки'));
     }
-    return res.status(500).send({ message: 'На сервере произошла ошибка', ...err });
+    next(err);
+    return null;
   }
 };
