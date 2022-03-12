@@ -3,8 +3,7 @@ const jwt = require('jsonwebtoken');
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports = (req, res, next) => {
-  const token = req.headers.authorization;
-  // const token = req.cookies.mestoToken;
+  const token = req.headers.cookie.replace('mestoToken=', '');
   if (!token) {
     return res.status(401).send({ message: 'Необходима авторизация' });
   }

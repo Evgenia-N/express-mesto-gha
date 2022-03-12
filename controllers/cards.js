@@ -20,8 +20,9 @@ exports.createCard = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'ValidationError') {
       next(new BadRequestError('Произошла ошибка при заполнении обязательных полей'));
+    } else {
+      next(err);
     }
-    next(err);
     return null;
   }
 };
@@ -40,8 +41,9 @@ exports.deleteCard = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'CastError') {
       next(new BadRequestError('Ошибка удаления фото'));
+    } else {
+      next(err);
     }
-    next(err);
     return null;
   }
 };
@@ -61,8 +63,9 @@ exports.likeCard = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'CastError') {
       next(new BadRequestError('Ошибка проставления отметки'));
+    } else {
+      next(err);
     }
-    next(err);
     return null;
   }
 };
@@ -82,8 +85,9 @@ exports.dislikeCard = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'CastError') {
       next(new BadRequestError('Ошибка проставления отметки'));
+    } else {
+      next(err);
     }
-    next(err);
     return null;
   }
 };

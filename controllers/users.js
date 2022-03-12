@@ -28,8 +28,9 @@ exports.getUser = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'CastError') {
       next(new BadRequestError('Переданы некорректные данные'));
+    } else {
+      next(err);
     }
-    next(err);
     return null;
   }
 };
@@ -62,8 +63,9 @@ exports.createUser = (req, res, next) => {
       }
       if (err.code === DUPLICATE_ERROR_CODE) {
         next(new DuplicateError('Пользователь с таким email уже зарегистрирован'));
+      } else {
+        next(err);
       }
-      next(err);
       return null;
     });
 };
@@ -86,7 +88,7 @@ exports.login = (req, res, next) => {
           }
           const token = generateToken({ _id: user._id });
           res.cookie('mestoToken', token, {
-            maxAge: 3600 * 24 * 7,
+            maxAge: 3600000 * 24 * 7,
             httpOnly: true,
             sameSite: true,
           });
@@ -118,8 +120,9 @@ exports.updateUser = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'ValidationError') {
       next(new BadRequestError('Произошла ошибка при заполнении обязательных полей'));
+    } else {
+      next(err);
     }
-    next(err);
     return null;
   }
 };
@@ -141,8 +144,9 @@ exports.updateAvatar = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'ValidationError') {
       next(new BadRequestError('Произошла ошибка при заполнении обязательных полей'));
+    } else {
+      next(err);
     }
-    next(err);
     return null;
   }
 };
