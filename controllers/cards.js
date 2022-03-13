@@ -16,14 +16,13 @@ exports.createCard = async (req, res, next) => {
   try {
     const { name, link } = req.body;
     const newCard = new Card({ name, link, owner: req.user._id });
-    return res.status(201).send(await newCard.save());
+    res.status(201).send(await newCard.save());
   } catch (err) {
     if (err.name === 'ValidationError') {
       next(new BadRequestError('Произошла ошибка при заполнении обязательных полей'));
     } else {
       next(err);
     }
-    return null;
   }
 };
 
@@ -33,18 +32,19 @@ exports.deleteCard = async (req, res, next) => {
     if (deletedCard) {
       if (req.user._id === deletedCard.owner._id.toString()) {
         await Card.findByIdAndRemove(req.params.cardId);
-        return res.status(200).send({ message: 'Следующие данные были удалены', deletedCard });
+        res.status(200).send({ message: 'Следующие данные были удалены', deletedCard });
+      } else {
+        throw new ForbiddenError('Нет прав для удаления данного фото');
       }
-      throw new ForbiddenError('Нет прав для удаления данного фото');
+    } else {
+      throw new NotFoundError('Фото не найдено');
     }
-    throw new NotFoundError('Фото не найдено');
   } catch (err) {
     if (err.name === 'CastError') {
       next(new BadRequestError('Ошибка удаления фото'));
     } else {
       next(err);
     }
-    return null;
   }
 };
 
@@ -57,16 +57,16 @@ exports.likeCard = async (req, res, next) => {
         { $addToSet: { likes: req.user._id } },
         { new: true },
       );
-      return res.status(200).send(likedCard);
+      res.status(200).send(likedCard);
+    } else {
+      throw new NotFoundError('Фото с таким id не существует');
     }
-    throw new NotFoundError('Фото с таким id не существует');
   } catch (err) {
     if (err.name === 'CastError') {
       next(new BadRequestError('Ошибка проставления отметки'));
     } else {
       next(err);
     }
-    return null;
   }
 };
 
@@ -79,15 +79,15 @@ exports.dislikeCard = async (req, res, next) => {
         { $pull: { likes: req.user._id } },
         { new: true },
       );
-      return res.status(200).send(dislikedCard);
+      res.status(200).send(dislikedCard);
+    } else {
+      throw new NotFoundError('Фото с таким id не существует');
     }
-    throw new NotFoundError('Фото с таким id не существует');
   } catch (err) {
     if (err.name === 'CastError') {
       next(new BadRequestError('Ошибка проставления отметки'));
     } else {
       next(err);
     }
-    return null;
   }
 };

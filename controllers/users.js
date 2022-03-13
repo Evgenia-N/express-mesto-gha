@@ -21,17 +21,16 @@ exports.getUsers = async (req, res, next) => {
 exports.getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.userId);
-    if (user) {
-      return res.status(200).send(user);
+    if (!user) {
+      throw new NotFoundError('Пользователя с таким id не существует');
     }
-    throw new NotFoundError('Пользователя с таким id не существует');
+    res.status(200).send(user);
   } catch (err) {
     if (err.name === 'CastError') {
       next(new BadRequestError('Переданы некорректные данные'));
     } else {
       next(err);
     }
-    return null;
   }
 };
 
@@ -45,7 +44,9 @@ exports.getThisUser = async (req, res, next) => {
 };
 
 exports.createUser = (req, res, next) => {
-  const { email, password } = req.body;
+  const {
+    email, password, name, about, avatar,
+  } = req.body;
   if (!email || !password) {
     throw new BadRequestError('Произошла ошибка при заполнении обязательных полей');
   }
@@ -53,6 +54,9 @@ exports.createUser = (req, res, next) => {
     .then((hash) => User.create({
       email,
       password: hash,
+      name,
+      about,
+      avatar,
     }))
     .then((user) => {
       res.status(201).send({ message: 'Регистрация прошла успешно!', _id: user._id, email: user.email });
@@ -66,7 +70,6 @@ exports.createUser = (req, res, next) => {
       } else {
         next(err);
       }
-      return null;
     });
 };
 
@@ -99,7 +102,7 @@ exports.login = (req, res, next) => {
         });
     })
     .catch((err) => {
-      next(err);
+      next(new UnAuthorisedError(err.message));
     });
 };
 
@@ -114,16 +117,16 @@ exports.updateUser = async (req, res, next) => {
       },
     );
     if (user) {
-      return res.status(200).send(user);
+      res.status(200).send(user);
+    } else {
+      throw new NotFoundError('Пользователь не найден');
     }
-    throw new NotFoundError('Пользователь не найден');
   } catch (err) {
     if (err.name === 'ValidationError') {
       next(new BadRequestError('Произошла ошибка при заполнении обязательных полей'));
     } else {
       next(err);
     }
-    return null;
   }
 };
 
@@ -138,15 +141,15 @@ exports.updateAvatar = async (req, res, next) => {
       },
     );
     if (user) {
-      return res.status(200).send(user);
+      res.status(200).send(user);
+    } else {
+      throw new NotFoundError('Пользователь не найден');
     }
-    throw new NotFoundError('Пользователь не найден');
   } catch (err) {
     if (err.name === 'ValidationError') {
       next(new BadRequestError('Произошла ошибка при заполнении обязательных полей'));
     } else {
       next(err);
     }
-    return null;
   }
 };
