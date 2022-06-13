@@ -1,6 +1,6 @@
 [![Tests](https://github.com/Evgenia-N/express-mesto-gha/actions/workflows/tests-13-sprint.yml/badge.svg)](https://github.com/Evgenia-N/express-mesto-gha/actions/workflows/tests-13-sprint.yml) [![Tests](https://github.com/Evgenia-N/express-mesto-gha/actions/workflows/tests-14-sprint.yml/badge.svg)](https://github.com/Evgenia-N/express-mesto-gha/actions/workflows/tests-14-sprint.yml)
 
-# Проект Mesto фронтенд + бэкенд
+# Проект Mesto: бэкенд
 
 Проектные работы №№13, 14 на курсе Яндекс Практикума "Веб-разработчик" посвящены подготовке бэкенда для приложения Mesto,
 где пользователи могут регистрироваться, указывать данные о себе, выбирать аватар, 
