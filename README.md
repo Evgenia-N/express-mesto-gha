@@ -12,6 +12,18 @@
 `/controllers` — папка с файлами контроллеров пользователя и карточки   
 `/models` — папка с файлами описания схем пользователя и карточки  
 `/middlewares` — папка с middleware-компонентами
+
+## Технологии
+
+`Node.js`,
+`MongoDB`,
+`Bcrypt.js`: 2.4.3,
+`Celebrate`: 15.0.1,
+`Cookie-parser`: 1.4.6,
+`Express`: 4.17.3,
+`Jsonwebtoken`: 8.5.1,
+`Mongoose`: 6.2.2,
+`Validator`: 13.7.0
   
 ## Запуск проекта
 
